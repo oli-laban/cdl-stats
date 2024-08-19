@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    ports:
+      - 5454:5432
+    environment:
+      PGPASSWORD: 'password'
+      POSTGRES_DB: 'cod_stats'
+      POSTGRES_USER: 'cod_stats'
+      POSTGRES_PASSWORD: 'password'
+    volumes:
+      - 'cod-stats-pgsql:/var/lib/postgresql/data'
+volumes:
+  cod-stats-pgsql:
+    driver: local

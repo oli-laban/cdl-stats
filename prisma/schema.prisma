@@ -1,0 +1,367 @@
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum AddedVia {
+  CDL
+  BP
+}
+
+model Release {
+  @@map("releases")
+
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  name String @unique
+  shortName String @unique @map("short_name")
+  abbreviation String @unique
+
+  maps Map[]
+  seasons Season[]
+  tournaments Tournament[]
+}
+
+model Map {
+  @@map("maps")
+
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  name String
+  releaseId Int @map("release_id")
+
+  release Release @relation(fields: [releaseId], references: [id])
+  games Game[]
+}
+
+model Player {
+  @@map("players")
+
+  id Int @id @default(autoincrement())
+  cdlId Int? @unique @map("cdl_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  name String @unique
+  fullName String? @map("full_name")
+  country String?
+  twitterUrl String? @map("twitter_url")
+  twitchUrl String? @map("twitch_url")
+  youtubeUrl String? @map("youtube_url")
+
+  games PlayerResult[]
+}
+
+model Team {
+  @@map("teams")
+
+  id Int @id @default(autoincrement())
+  cdlId Int? @map("cdl_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  name String @unique
+  abbreviation String? @db.VarChar(5) @unique
+
+  homeMatches Match[] @relation("HomeTeam")
+  awayMatches Match[] @relation("AwayTeam")
+  wonMatches Match[] @relation("WinningTeam")
+  wonGames Game[] @relation("WinningTeam")
+  gameResults GameResult[]
+  playerResults PlayerResult[]
+  wonRounds GameRound[] @relation("WinningTeam")
+}
+
+enum Tier {
+  CDL
+  CHALLENGERS
+}
+
+model Season {
+  @@map("seasons")
+
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  name String
+  year Int?
+  tier Tier @default(CDL)
+  releaseId Int @map("release_id")
+
+  splits Split[]
+  release Release @relation(fields: [releaseId], references: [id])
+}
+
+model Split {
+  @@map("splits")
+
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  name String
+  seasonId Int @map("season_id")
+
+  season Season @relation(fields: [seasonId], references: [id])
+  tournaments Tournament[]
+}
+
+enum SplitType {
+  QUALIFIERS
+  FINAL
+}
+
+enum TournamentFormat {
+  ROUND
+  BRACKET
+}
+
+enum BracketType {
+  SINGLE_ELIMINATION
+  DOUBLE_ELIMINATION
+}
+
+model Tournament {
+  @@map("tournaments")
+
+  id Int @id @default(autoincrement())
+  bpId Int? @map("bp_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  name String
+  startDate DateTime? @map("start_date")
+  endDate DateTime? @map("end_date")
+  splitId Int? @map("split_id")
+  splitType SplitType? @map("split_type")
+  releaseId Int? @map("release_id")
+  tier Tier @default(CDL)
+  format TournamentFormat
+  bracketType BracketType? @map("bracket_type")
+  hasGroupPlay Boolean @default(false) @map("has_group_play")
+  isGroupPlay Boolean @default(false) @map("is_group_play")
+  groupPlayParentId Int? @map("group_play_parent_id")
+
+  split Split? @relation(fields: [splitId], references: [id])
+  release Release? @relation(fields: [releaseId], references: [id])
+  groupPlayParent Tournament? @relation("GroupPlay", fields: [groupPlayParentId], references: [id])
+  groups Tournament[] @relation("GroupPlay")
+  matches Match[]
+  bracketSlots BracketSlot[]
+}
+
+enum ScoringType {
+  ROUNDS
+  POINTS
+}
+
+model Mode {
+  @@map("modes")
+
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  name String @unique
+  shortName String @map("short_name") @unique
+  scoringType ScoringType @map("scoring_type")
+  winningScore Int @map("winning_score")
+
+  games Game[]
+}
+
+enum MatchFormat {
+  BEST_OF_3
+  BEST_OF_5
+  BEST_OF_7
+  BEST_OF_9
+}
+
+enum MatchStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model Match {
+  @@map("matches")
+
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  tournamentId Int @map("tournament_id")
+  team1Id Int? @map("team_1_id")
+  team2Id Int? @map("team_2_id")
+  winnerId Int? @map("winner_id")
+  team1Score Int @default(0) @map("team_1_score")
+  team2Score Int @default(0) @map("team_2_score")
+  format MatchFormat @default(BEST_OF_5)
+  status MatchStatus @default(SCHEDULED)
+  forfeited Boolean @default(false)
+  date DateTime?
+  cdlId Int? @unique @map("cdl_id")
+  bpId Int? @unique @map("bp_id")
+  cdlUrl String? @map("cdl_url")
+  bpUrl String? @map("bp_url")
+  streamUrl String? @map("stream_url")
+  vodUrl String? @map("vod_url")
+  lastCdlSync DateTime? @map("last_cdl_sync")
+  lastBpSync DateTime? @map("last_bp_sync")
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  bracketSlot BracketSlot?
+  team1 Team? @relation("HomeTeam", fields: [team1Id], references: [id])
+  team2 Team? @relation("AwayTeam", fields: [team2Id], references: [id])
+  winner Team? @relation("WinningTeam", fields: [winnerId], references: [id])
+  games Game[]
+  playerResults PlayerResult[]
+}
+
+enum BracketSlotType {
+  UPPER
+  LOWER
+}
+
+model BracketSlot {
+  @@map("bracket_slots")
+
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  tournamentId Int @map("tournament_id")
+  matchId Int @unique @map("match_id")
+  round Int
+  shortRoundName String @map("short_round_name")
+  roundName String? @map("round_name")
+  position Int
+  type BracketSlotType @default(UPPER)
+  nextWinnerSlotId Int? @map("next_winner_slot_id")
+  nextLoserSlotId Int? @map("next_loser_slot_id")
+
+  tournament Tournament @relation(fields: [tournamentId], references: [id])
+  match Match @relation(fields: [matchId], references: [id])
+  nextWinnerSlot BracketSlot? @relation("WinnerSlot", fields: [nextWinnerSlotId], references: [id])
+  nextLoserSlot BracketSlot? @relation("LoserSlot", fields: [nextLoserSlotId], references: [id])
+  prevWinnerSlots BracketSlot[] @relation("WinnerSlot")
+  prevLoserSlots BracketSlot[] @relation("LoserSlot")
+}
+
+model Game {
+  @@map("games")
+
+  id Int @id @default(autoincrement())
+  cdlId Int? @unique @map("cdl_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  matchId Int @map("match_id")
+  modeId Int @map("mode_id")
+  mapId Int? @map("map_id")
+  order Int @default(0)
+  winnerId Int? @map("winner_id")
+  forfeited Boolean @default(false)
+
+  match Match @relation(fields: [matchId], references: [id])
+  mode Mode @relation(fields: [modeId], references: [id])
+  map Map? @relation(fields: [mapId], references: [id])
+  winner Team? @relation("WinningTeam", fields: [winnerId], references: [id])
+  teamResults GameResult[]
+  rounds GameRound[]
+  playerResults PlayerResult[]
+}
+
+model GameResult {
+  @@map("game_results")
+
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  gameId Int @map("game_id")
+  teamId Int @map("team_id")
+  score Int
+
+  game Game @relation(fields: [gameId], references: [id])
+  team Team @relation(fields: [teamId], references: [id])
+}
+
+enum RoundWinCondition {
+  KILLS
+  TIME
+  BOMB
+  DEFUSE
+  TICKS
+}
+
+model GameRound {
+  @@map("game_rounds")
+
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  gameId Int @map("game_id")
+  winnerId Int? @map("winner_id")
+  winCondition RoundWinCondition? @map("win_condition")
+
+  game Game @relation(fields: [gameId], references: [id])
+  winner Team? @relation("WinningTeam", fields: [winnerId], references: [id])
+}
+
+model PlayerResult {
+  @@map("player_results")
+
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  matchId Int @map("match_id")
+  gameId Int? @map("game_id")
+  playerId Int @map("player_id")
+  teamId Int @map("team_id")
+  kills Int?
+  deaths Int?
+  assists Int?
+  damage Int?
+  teamDamage Int? @map("team_damage")
+  damageTaken Int? @map("damage_taken")
+  score Int?
+  killDeathRatio String? @map("kill_death_ratio")
+  untradedKills Int? @map("untraded_kills")
+  tradedKills Int? @map("traded_kills")
+  untradedDeaths Int? @map("untraded_deaths")
+  tradedDeaths Int? @map("traded_deaths")
+  firstBloods Int? @map("first_bloods")
+  victimFovKills Int? @map("victim_fov_kills")
+  highestStreak Int? @map("highest_streak")
+  highestMultikill Int? @map("highest_multikill")
+  tacticalsUsed Int? @map("tacticals_used")
+  lethalsUsed Int? @map("lethals_used")
+  shotsFired Int? @map("shots_fired")
+  shotsHit Int? @map("shots_hit")
+  headshots Int?
+  longshots Int?
+  wallbangs Int?
+  averageSpeed Float? @map("average_speed")
+  percentTimeMoving Int? @map("percent_time_moving")
+  distanceTraveled Float? @map("distance_traveled")
+  ctrlCaptures Int? @map("ctrl_captures")
+  ctrlTicks Int? @map("ctrl_ticks")
+  sndAces Int? @map("snd_aces")
+  sndPlants Int? @map("snd_plants")
+  sndDefuses Int? @map("snd_defuses")
+  sndNinjaDefuses Int? @map("snd_ninja_defuses")
+  sndDefuserKills Int? @map("snd_defuser_kills")
+  sndPlanterKills Int? @map("snd_planter_kills")
+  hpHillTime Int? @map("hp_hill_time")
+  hpHill1Time Int? @map("hp_hill_1_time")
+  hpHill2Time Int? @map("hp_hill_2_time")
+  hpHill3Time Int? @map("hp_hill_3_time")
+  hpHill4Time Int? @map("hp_hill_4_time")
+  hpHill5Time Int? @map("hp_hill_5_time")
+  hpHill6Time Int? @map("hp_hill_6_time")
+  hpHill7Time Int? @map("hp_hill_7_time")
+  hpContestTime Int? @map("hp_contest_time")
+
+  match Match @relation(fields: [matchId], references: [id])
+  game Game? @relation(fields: [gameId], references: [id])
+  player Player @relation(fields: [playerId], references: [id])
+  team Team @relation(fields: [teamId], references: [id])
+}

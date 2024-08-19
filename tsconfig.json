@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es2022",
+    "target": "ESNext",
     "module": "node16",
-    "lib": ["ES2022"],
+    "lib": ["ESNext", "dom"],
     "moduleResolution": "node16",
     "rootDir": ".",
     "outDir": "build",
@@ -17,7 +17,8 @@
     "noUnusedParameters": true,
     "noImplicitAny": false,
     "noImplicitThis": false,
-    "strictNullChecks": false
+    "strictNullChecks": false,
+    "skipLibCheck": true
   },
-  "include": ["src/**/*", "__tests__/**/*"]
+  "include": ["src/**/*", "prisma/**/*.ts"]
 }
