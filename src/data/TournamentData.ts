@@ -2,6 +2,10 @@ import BracketSlotData from './BracketSlotData.js'
 import MatchData from './MatchData.js'
 
 export default abstract class TournamentData {
+  abstract idType(): 'CDL' | 'BP'
+
+  abstract id(): number | null
+
   abstract name(): string
 
   abstract startDate(): Date | null

@@ -14,6 +14,14 @@ export default class CdlGroupBracketGroup extends TournamentData {
     )
   }
 
+  id(): number | null {
+    return null
+  }
+
+  idType(): 'CDL' | 'BP' {
+    return 'CDL'
+  }
+
   bracketSlots(): BracketSlotData[] {
     return this.data.slots
   }

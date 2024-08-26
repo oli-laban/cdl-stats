@@ -33,6 +33,14 @@ export default class CdlSubStage extends TournamentData {
     return headerBlock?.cdlWeekHeader.primaryTitle || this.data.title
   }
 
+  id(): number | null {
+    return null
+  }
+
+  idType(): 'CDL' | 'BP' {
+    return 'CDL'
+  }
+
   title(): string {
     return this.data.title
   }
