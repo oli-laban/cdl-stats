@@ -1,5 +1,7 @@
+import { RoundWinCondition } from '@prisma/client'
+
 export default abstract class GameRoundData {
   abstract winner(): number | null
 
-  abstract winCondition(): 'KILLS' | 'TIME' | 'DEFUSE' | 'BOMB' | 'TICKS' | null
+  abstract winCondition(): RoundWinCondition | null
 }

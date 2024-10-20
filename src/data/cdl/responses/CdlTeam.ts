@@ -2,6 +2,7 @@ import TeamData from '../../TeamData.js'
 import { Team, TeamCard } from '../types.js'
 import CdlPlayer from './CdlPlayer.js'
 import PlayerData from '../../PlayerData.js'
+import { IdType } from '../../../lib/prisma/index.js'
 
 export default class CdlTeam extends TeamData {
   protected _players: CdlPlayer[] = []
@@ -22,13 +23,17 @@ export default class CdlTeam extends TeamData {
     return this.data.teamId
   }
 
-  idType(): 'CDL' | 'BP' {
+  idType(): IdType {
     return 'CDL'
   }
 
   name(): string {
     if (this.data.fullTeamName === 'Texas OpTic') {
       return 'OpTic Texas'
+    }
+
+    if (this.data.fullTeamName === 'Vegas Legion') {
+      return 'Las Vegas Legion'
     }
 
     return this.data.fullTeamName

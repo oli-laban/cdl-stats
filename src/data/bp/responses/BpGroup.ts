@@ -3,6 +3,8 @@ import BpBracketSlot from './BpBracketSlot.js'
 import BracketSlotData from '../../BracketSlotData.js'
 import MatchData from '../../MatchData.js'
 import he from 'he'
+import { BracketType, SplitType, TournamentFormat } from '@prisma/client'
+import { IdType } from '../../../lib/prisma/index.js'
 
 export default class BpGroup extends TournamentData {
   protected _bracketSlots: BpBracketSlot[] = []
@@ -15,7 +17,7 @@ export default class BpGroup extends TournamentData {
     return null
   }
 
-  idType(): 'CDL' | 'BP' {
+  idType(): IdType {
     return 'BP'
   }
 
@@ -31,7 +33,7 @@ export default class BpGroup extends TournamentData {
     return this._bracketSlots
   }
 
-  bracketType(): 'SINGLE_ELIMINATION' | 'DOUBLE_ELIMINATION' | null {
+  bracketType(): BracketType | null {
     const hasLosers = this._bracketSlots.some((slot) => {
       slot.roundName().includes('Losers')
     })
@@ -43,7 +45,7 @@ export default class BpGroup extends TournamentData {
     return this._bracketSlots.length ? this._bracketSlots[this._bracketSlots.length - 1].match().date() : null
   }
 
-  format(): 'BRACKET' | 'ROUND' {
+  format(): TournamentFormat {
     return 'BRACKET'
   }
 
@@ -71,7 +73,7 @@ export default class BpGroup extends TournamentData {
     return null
   }
 
-  splitType(): 'QUALIFIERS' | 'FINAL' | null {
+  splitType(): SplitType | null {
     return null
   }
 

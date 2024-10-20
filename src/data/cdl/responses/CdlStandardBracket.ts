@@ -7,9 +7,7 @@ export default class CdlStandardBracket extends CdlBracket<CdlDynamicBracketNonA
       data.matches = CdlStandardBracket.fix2022Major1BracketMatches(data.matches)
     }
 
-    data.matches = data.matches.filter(
-      (match) => !CdlBracket.isDuplicatePosition(match.bracketPosition),
-    )
+    data.matches = data.matches.filter((match) => !CdlBracket.isDuplicatePosition(match.bracketPosition))
 
     const [matches, html] = CdlBracket.correctAltSingleElimPositions(data.matches, data.htmlTemplate)
 
@@ -25,28 +23,28 @@ export default class CdlStandardBracket extends CdlBracket<CdlDynamicBracketNonA
       position: match.bracketPosition,
       team1Score: match.scores?.[0] || 0,
       team2Score: match.scores?.[1] || 0,
-      team1: 'id' in match.competitors[0]
-        ? {
-          id: match.competitors[0].id,
-          name: match.competitors[0].name,
-          abbreviation: match.competitors[0].abbreviatedName,
-        }
-        : null,
-      team2: 'id' in match.competitors[1]
-        ? {
-          id: match.competitors[1].id,
-          name: match.competitors[1].name,
-          abbreviation: match.competitors[1].abbreviatedName,
-        }
-        : null,
+      team1:
+        'id' in match.competitors[0]
+          ? {
+              id: match.competitors[0].id,
+              name: match.competitors[0].name,
+              abbreviation: match.competitors[0].abbreviatedName,
+            }
+          : null,
+      team2:
+        'id' in match.competitors[1]
+          ? {
+              id: match.competitors[1].id,
+              name: match.competitors[1].name,
+              abbreviation: match.competitors[1].abbreviatedName,
+            }
+          : null,
       link: match.link,
       status: match.status,
       startDate: match.startDate,
     }))
 
-    return this.addRoundNamesToMatches(
-      this.determineRoundAndPositionNumbersFromString(matches),
-    )
+    return this.determineRoundAndPositionNumbersFromString(matches)
   }
 
   getData(): CdlDynamicBracketNonArchived {

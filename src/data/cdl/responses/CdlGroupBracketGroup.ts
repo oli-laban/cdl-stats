@@ -2,6 +2,8 @@ import TournamentData from '../../TournamentData.js'
 import BracketSlotData from '../../BracketSlotData.js'
 import MatchData from '../../MatchData.js'
 import CdlBracketSlot from './CdlBracketSlot.js'
+import { BracketType, SplitType, TournamentFormat } from '@prisma/client'
+import { IdType } from '../../../lib/prisma/index.js'
 
 export default class CdlGroupBracketGroup extends TournamentData {
   protected slots: CdlBracketSlot[]
@@ -9,16 +11,14 @@ export default class CdlGroupBracketGroup extends TournamentData {
   constructor(protected data: { groupName: string; slots: CdlBracketSlot[] }) {
     super()
 
-    this.slots = data.slots.sort(
-      (a, b) => a.match().date().getTime() - b.match().date().getTime(),
-    )
+    this.slots = data.slots.sort((a, b) => a.match().date().getTime() - b.match().date().getTime())
   }
 
   id(): number | null {
     return null
   }
 
-  idType(): 'CDL' | 'BP' {
+  idType(): IdType {
     return 'CDL'
   }
 
@@ -26,7 +26,7 @@ export default class CdlGroupBracketGroup extends TournamentData {
     return this.data.slots
   }
 
-  bracketType(): 'SINGLE_ELIMINATION' | 'DOUBLE_ELIMINATION' | null {
+  bracketType(): BracketType | null {
     return 'DOUBLE_ELIMINATION'
   }
 
@@ -38,7 +38,7 @@ export default class CdlGroupBracketGroup extends TournamentData {
     return this.slots[this.slots.length - 1].match().date()
   }
 
-  format(): 'BRACKET' | 'ROUND' {
+  format(): TournamentFormat {
     return 'BRACKET'
   }
 
@@ -62,7 +62,7 @@ export default class CdlGroupBracketGroup extends TournamentData {
     return this.data.groupName
   }
 
-  splitType(): 'QUALIFIERS' | 'FINAL' | null {
+  splitType(): SplitType | null {
     return null
   }
 

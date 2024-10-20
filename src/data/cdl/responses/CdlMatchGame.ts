@@ -2,19 +2,24 @@ import GameData from '../../GameData.js'
 import GameRoundData from '../../GameRoundData.js'
 import { Match, MatchGame, MatchGameResult } from '../types.js'
 import CdlMatchPlayerGame from './CdlMatchPlayerGame.js'
+import { GameMode, IdType } from '../../../lib/prisma/index.js'
 
 export default class CdlMatchGame extends GameData {
   protected _players: CdlMatchPlayerGame[] = []
 
-  constructor(protected data: MatchGame, protected matchData: Match, protected result?: MatchGameResult) {
+  constructor(
+    protected data: MatchGame,
+    protected matchData: Match,
+    protected result?: MatchGameResult,
+  ) {
     super()
   }
 
-  id(): number {
+  id(): number | null {
     return this.data.id
   }
 
-  idType(): "CDL" | "BP" {
+  idType(): IdType {
     return undefined
   }
 
@@ -22,11 +27,7 @@ export default class CdlMatchGame extends GameData {
     return this.data.map || this.data.gameMap?.displayName || null
   }
 
-  matchId(): number {
-    return this.data.matchId
-  }
-
-  mode(): "HP" | "SND" | "CTRL" {
+  mode(): GameMode {
     const { mode } = this.data
 
     if (!mode) {
@@ -101,6 +102,34 @@ export default class CdlMatchGame extends GameData {
 
   winner(): number | null {
     return this.result?.winnerTeamId
+  }
+
+  gametime(): number | null {
+    return null
+  }
+
+  team1CtrlAttackingRounds(): number | null {
+    return null
+  }
+
+  team1CtrlTicks(): number | null {
+    return null
+  }
+
+  team1HpHillScores(): number[] {
+    return []
+  }
+
+  team2CtrlAttackingRounds(): number | null {
+    return null
+  }
+
+  team2CtrlTicks(): number | null {
+    return null
+  }
+
+  team2HpHillScores(): number[] {
+    return []
   }
 
   addPlayer(player: CdlMatchPlayerGame): void {

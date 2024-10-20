@@ -2,6 +2,7 @@ import TeamData from '../../TeamData.js'
 import PlayerData from '../../PlayerData.js'
 import { Team } from '../types.js'
 import he from 'he'
+import { IdType } from '../../../lib/prisma/index.js'
 
 export default class BpTeam extends TeamData {
   constructor(protected data: Team) {
@@ -16,7 +17,7 @@ export default class BpTeam extends TeamData {
     return this.data.id
   }
 
-  idType(): 'CDL' | 'BP' {
+  idType(): IdType {
     return 'BP'
   }
 

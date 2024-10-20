@@ -20,5 +20,5 @@
     "strictNullChecks": false,
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "prisma/**/*.ts"]
+  "include": ["src/**/*", "prisma/**/*.ts", "working/**/*.ts"]
 }

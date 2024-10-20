@@ -1,9 +1,11 @@
 import TeamData from './TeamData.js'
 import GameData from './GameData.js'
 import PlayerResultData from './PlayerResultData.js'
+import { MatchFormat, MatchStatus } from '@prisma/client'
+import { IdType } from '../lib/prisma/index.js'
 
 export default abstract class MatchData {
-  abstract idType(): 'CDL' | 'BP'
+  abstract idType(): IdType
 
   abstract team1(): TeamData | null
 
@@ -17,9 +19,9 @@ export default abstract class MatchData {
 
   abstract date(): Date
 
-  abstract format(): 'BEST_OF_3' | 'BEST_OF_5' | 'BEST_OF_7' | 'BEST_OF_9'
+  abstract format(): MatchFormat
 
-  abstract status(): 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED'
+  abstract status(): MatchStatus
 
   abstract cdlUrl(): string | null
 

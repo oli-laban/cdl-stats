@@ -1,8 +1,10 @@
 import BracketSlotData from './BracketSlotData.js'
 import MatchData from './MatchData.js'
+import { BracketType, SplitType, TournamentFormat } from '@prisma/client'
+import { IdType } from '../lib/prisma/index.js'
 
 export default abstract class TournamentData {
-  abstract idType(): 'CDL' | 'BP'
+  abstract idType(): IdType
 
   abstract id(): number | null
 
@@ -12,13 +14,13 @@ export default abstract class TournamentData {
 
   abstract endDate(): Date | null
 
-  abstract splitType(): 'QUALIFIERS' | 'FINAL' | null
+  abstract splitType(): SplitType | null
 
-  abstract format(): 'BRACKET' | 'ROUND'
+  abstract format(): TournamentFormat
 
   abstract matches(): MatchData[]
 
-  abstract bracketType(): 'SINGLE_ELIMINATION' | 'DOUBLE_ELIMINATION' | null
+  abstract bracketType(): BracketType | null
 
   abstract bracketSlots(): BracketSlotData[]
 
@@ -31,8 +33,4 @@ export default abstract class TournamentData {
   abstract groups(): TournamentData[]
 
   abstract release(): string | null
-
-  tier(): 'CDL' | 'CHALLENGERS' {
-    return 'CDL'
-  }
 }

@@ -1,4 +1,5 @@
 import MatchData from './MatchData.js'
+import { BracketSlotType } from '@prisma/client'
 
 export default abstract class BracketSlotData {
   abstract match(): MatchData
@@ -11,7 +12,7 @@ export default abstract class BracketSlotData {
 
   abstract position(): number
 
-  abstract type(): 'UPPER' | 'LOWER'
+  abstract type(): BracketSlotType
 
   isBye(): boolean {
     return false

@@ -1,5 +1,5 @@
 interface PlayerSocial {
-  socialNetworkType: "TWITTER" | string
+  socialNetworkType: 'TWITTER' | string
   handle: string
 }
 
@@ -10,7 +10,7 @@ export interface Player {
   alias: string
   dob?: string
   homeCountry?: string
-  role?: "Player" | "Substitute" | string
+  role?: 'Player' | 'Substitute' | string
   socialNetworkHandles: PlayerSocial[]
 }
 
@@ -119,12 +119,12 @@ interface BasePlayerStats {
   totalRotationKills?: number
   totalInAttackerFovKills?: number
   totalWallbangKills?: number
-  killDeathRatio?: string,
-  calculatedHillTime?: string,
-  objective1Time?: string,
-  objective2Time?: string,
-  objective3Time?: string,
-  objective4Time?: string,
+  killDeathRatio?: string
+  calculatedHillTime?: string
+  objective1Time?: string
+  objective2Time?: string
+  objective3Time?: string
+  objective4Time?: string
   objective5Time?: string
 }
 
@@ -162,9 +162,7 @@ interface CompletedMatchResult extends BaseMatchResult {
   loserTeamId: number
 }
 
-type Result<S extends MatchStatus> = S extends MatchStatus.Completed
-  ? CompletedMatchResult
-  : BaseMatchResult
+type Result<S extends MatchStatus> = S extends MatchStatus.Completed ? CompletedMatchResult : BaseMatchResult
 
 export interface Match<S extends MatchStatus = MatchStatus> {
   startDate: number
@@ -177,12 +175,8 @@ export interface Match<S extends MatchStatus = MatchStatus> {
     stageHomeTeamId?: number
   }
   result: Result<S>
-  homeTeamCard: S extends MatchStatus.Completed
-    ? TeamCard
-    : TeamCard | undefined
-  awayTeamCard: S extends MatchStatus.Completed
-    ? TeamCard
-    : TeamCard | undefined
+  homeTeamCard: S extends MatchStatus.Completed ? TeamCard : TeamCard | undefined
+  awayTeamCard: S extends MatchStatus.Completed ? TeamCard : TeamCard | undefined
   broadcastLinks: {
     url: string
     isDefault: boolean
@@ -212,15 +206,10 @@ export interface CompletedOrInProgressBracketMatch extends BaseBracketMatch {
 export interface PendingBracketMatch extends BaseBracketMatch {
   status: MatchStatus.Pending
   scores: []
-  competitors: [
-    BracketMatchTeam | PendingBracketMatchTeam,
-    BracketMatchTeam | PendingBracketMatchTeam,
-  ]
+  competitors: [BracketMatchTeam | PendingBracketMatchTeam, BracketMatchTeam | PendingBracketMatchTeam]
 }
 
-export type BracketMatch =
-  | CompletedOrInProgressBracketMatch
-  | PendingBracketMatch
+export type BracketMatch = CompletedOrInProgressBracketMatch | PendingBracketMatch
 
 export interface GroupBracketMatch {
   matchId: string
@@ -329,17 +318,19 @@ export interface CdlMatchDetailBlock {
     ContentTypeUid: 'block_cdl_match_detail'
     matchData: {
       matchExtended: Match
-      matchGamesExtended: { matchGame: MatchGame, matchGameResult?: MatchGameResult }[]
-      matchStats?: {
-        overall: {
-          hostTeam: MatchPlayerOverall[]
-          guestTeam: MatchPlayerOverall[]
-        }
-        matches: {
-          hostTeam: MatchPlayerGame[][]
-          guestTeam: MatchPlayerGame[][]
-        }
-      } | []
+      matchGamesExtended: { matchGame: MatchGame; matchGameResult?: MatchGameResult }[]
+      matchStats?:
+        | {
+            overall: {
+              hostTeam: MatchPlayerOverall[]
+              guestTeam: MatchPlayerOverall[]
+            }
+            matches: {
+              hostTeam: MatchPlayerGame[][]
+              guestTeam: MatchPlayerGame[][]
+            }
+          }
+        | []
     }
   }
 }
@@ -362,9 +353,7 @@ export interface CdlDynamicBracketNonArchived extends CdlDynamicBracketBase {
   matches: BracketMatch[]
 }
 
-export type CdlDynamicBracket =
-  | CdlDynamicBracketArchived
-  | CdlDynamicBracketNonArchived
+export type CdlDynamicBracket = CdlDynamicBracketArchived | CdlDynamicBracketNonArchived
 
 export interface CdlDynamicBracketBlock {
   cdlDynamicBracket: CdlDynamicBracket
@@ -387,9 +376,7 @@ export interface CdlDynamicGroupBracket {
   }[]
 }
 
-export type BracketWithData =
-  | CdlDynamicBracketNonArchived
-  | CdlDynamicGroupBracket
+export type BracketWithData = CdlDynamicBracketNonArchived | CdlDynamicGroupBracket
 
 export interface CdlDynamicGroupBracketBlock {
   cdlDynamicGroupBracket: CdlDynamicGroupBracket
@@ -413,10 +400,7 @@ interface TabResponseData<D, T extends boolean> {
   blocks: T extends true ? D : D | undefined
 }
 
-export type SeasonResponseData = TabResponseData<
-  (GenericBlock | StageTabsBlock)[],
-  true
->
+export type SeasonResponseData = TabResponseData<(GenericBlock | StageTabsBlock)[], true>
 
 export type StageResponseData<T extends boolean = false> = TabResponseData<
   (GenericBlock | EntireSeasonMatchCardsBlock | StageSubTabsBlock)[],
@@ -424,33 +408,19 @@ export type StageResponseData<T extends boolean = false> = TabResponseData<
 >
 
 export type SubStageResponseData<T extends boolean = false> = TabResponseData<
-  (
-    | GenericBlock
-    | CdlWeekHeaderBlock
-    | TournamentTabsBlock
-    | CdlMatchCardsBlock
-  )[],
+  (GenericBlock | CdlWeekHeaderBlock | TournamentTabsBlock | CdlMatchCardsBlock)[],
   T
 >
 
-export type TournamentBlock =
-  | GenericBlock
-  | CdlMatchCardsBlock
-  | CdlDynamicBracketBlock
-  | CdlDynamicGroupBracketBlock
+export type TournamentBlock = GenericBlock | CdlMatchCardsBlock | CdlDynamicBracketBlock | CdlDynamicGroupBracketBlock
 
-export type TournamentResponseData<T extends boolean = false> = TabResponseData<
-  TournamentBlock[],
-  T
->
+export type TournamentResponseData<T extends boolean = false> = TabResponseData<TournamentBlock[], T>
 
 export type StageTab<T extends boolean = false> = Tab & StageResponseData<T>
 
-export type StageSubTab<T extends boolean = false> = Tab &
-  SubStageResponseData<T>
+export type StageSubTab<T extends boolean = false> = Tab & SubStageResponseData<T>
 
-export type TournamentTab<T extends boolean = false> = Tab &
-  TournamentResponseData<T>
+export type TournamentTab<T extends boolean = false> = Tab & TournamentResponseData<T>
 
 export interface TabResponse<T> {
   data: {

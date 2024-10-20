@@ -1,9 +1,4 @@
-import {
-  CdlContainerBlock, CdlMatchDetailBlock,
-  GenericBlock,
-  SeasonDropdownItem,
-  Team,
-} from './types.js'
+import { CdlContainerBlock, CdlMatchDetailBlock, GenericBlock, SeasonDropdownItem, Team } from './types.js'
 import { fetchNextJsonString } from '../../util.js'
 
 const matchesDataUrl = 'https://callofdutyleague.com/en-us/schedule'
@@ -26,9 +21,7 @@ export const getSeasons = async (): Promise<SeasonDropdownItem[]> => {
     )
 
     if (!scheduleData) {
-      throw new Error(
-        `Schedule data possibly malformed. Check ${matchesDataUrl} response`,
-      )
+      throw new Error(`Schedule data possibly malformed. Check ${matchesDataUrl} response`)
     }
   }
 
@@ -39,13 +32,10 @@ export const getTeams = async (): Promise<Team[]> => {
   if (!teamsData) {
     const json = await fetchNextJsonString(teamsDataUrl)
 
-    teamsData =
-      JSON.parse(json)?.props?.pageProps?.blocks?.[1]?.cdlTeamListV3?.teams
+    teamsData = JSON.parse(json)?.props?.pageProps?.blocks?.[1]?.cdlTeamListV3?.teams
 
     if (!teamsData) {
-      throw new Error(
-        `Teams data possibly malformed. Check ${teamsDataUrl} response`,
-      )
+      throw new Error(`Teams data possibly malformed. Check ${teamsDataUrl} response`)
     }
   }
 
@@ -62,9 +52,7 @@ export const getMatchDetail = async (id: number): Promise<CdlMatchDetailBlock> =
   )
 
   if (!matchDetailBlock) {
-    throw new Error(
-      `Match (${id}) data possibly malformed. Check ${matchDetailUrl} response`,
-    )
+    throw new Error(`Match (${id}) data possibly malformed. Check ${matchDetailUrl} response`)
   }
 
   return matchDetailBlock

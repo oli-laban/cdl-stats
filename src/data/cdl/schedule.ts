@@ -4,9 +4,12 @@ import {
   BracketResponse,
   CdlDynamicBracket,
   CdlDynamicBracketBlock,
-  CdlDynamicBracketNonArchived, CdlDynamicGroupBracket,
+  CdlDynamicBracketNonArchived,
+  CdlDynamicGroupBracket,
   CdlDynamicGroupBracketBlock,
-  CdlMatchCardsBlock, CdlWeekHeaderBlock, Match,
+  CdlMatchCardsBlock,
+  CdlWeekHeaderBlock,
+  Match,
   SeasonDropdownItem,
   SeasonResponse,
   StageResponse,
@@ -162,8 +165,7 @@ const waitAndClickTab = async (selector: string): Promise<void> => {
 
 const waitForTabResponse = async <T>(): Promise<T> => {
   const response = await page.waitForResponse(
-    (response: HTTPResponse) =>
-      isNotPreflight(response) && response.url().includes('content-types/tab'),
+    (response: HTTPResponse) => isNotPreflight(response) && response.url().includes('content-types/tab'),
   )
 
   return (await response.json()) as T
@@ -175,9 +177,7 @@ const waitForBracketArchive = (bracket: CdlDynamicBracket): Promise<BracketRespo
     let elapsedTime = 0
 
     const interval = setInterval(() => {
-      const found = brackets.find(
-        (archiveBracket) => archiveBracket.url === bracket.archiveFile,
-      )
+      const found = brackets.find((archiveBracket) => archiveBracket.url === bracket.archiveFile)
 
       if (found) {
         clearInterval(interval)
@@ -190,11 +190,7 @@ const waitForBracketArchive = (bracket: CdlDynamicBracket): Promise<BracketRespo
       if (elapsedTime >= 30000) {
         clearInterval(interval)
 
-        reject(
-          new Error(
-            `Waiting for archive bracket "${bracket.archiveFile}" failed. Timeout exceeded.`,
-          ),
-        )
+        reject(new Error(`Waiting for archive bracket "${bracket.archiveFile}" failed. Timeout exceeded.`))
       }
     }, intervalTime)
   })
@@ -204,11 +200,7 @@ const processTournamentBlock = async (subStage: CdlSubStage, block: TournamentBl
     console.log('Match cards block. Adding matches to sub stage.')
 
     const matchCards = (block as CdlMatchCardsBlock).cdlMatchCards
-    const matches = [
-      ...matchCards.finalMatches,
-      ...matchCards.liveMatches,
-      ...matchCards.upcomingMatches,
-    ]
+    const matches = [...matchCards.finalMatches, ...matchCards.liveMatches, ...matchCards.upcomingMatches]
 
     matches.forEach((match) => {
       subStage.addMatch(new CdlMatch(match))
@@ -221,7 +213,7 @@ const processTournamentBlock = async (subStage: CdlSubStage, block: TournamentBl
   // on the qualifiers tab. Registering the bracket on both won't cause duplicates in the db,
   // but makes it difficult to determine the tournament format.
   if (subStage.title() === 'Qualifiers' || subStage.title() === 'Qualifier') {
-    return;
+    return
   }
 
   if (Object.hasOwn(block, 'cdlDynamicBracket')) {
@@ -247,17 +239,14 @@ const processTournamentBlock = async (subStage: CdlSubStage, block: TournamentBl
     } else {
       console.log('Bracket data on block. Adding to sub stage.')
 
-      subStage.addBracket(
-        new CdlStandardBracket(bracket as CdlDynamicBracketNonArchived),
-      )
+      subStage.addBracket(new CdlStandardBracket(bracket as CdlDynamicBracketNonArchived))
     }
 
     return
   }
 
   if (Object.hasOwn(block, 'cdlDynamicGroupBracket')) {
-    const bracket = (block as CdlDynamicGroupBracketBlock)
-      .cdlDynamicGroupBracket
+    const bracket = (block as CdlDynamicGroupBracketBlock).cdlDynamicGroupBracket
 
     console.log('Dynamic group bracket block. Adding to sub stage.')
 
@@ -277,9 +266,7 @@ const fetchTournamentTab = async (subStage: CdlSubStage, tournamentTab: Tourname
   console.log('Tournament tab clicked.')
 
   if (tournamentTab.blocks) {
-    console.log(
-      'Tournament tab already loaded (in previous response or static data).',
-    )
+    console.log('Tournament tab already loaded (in previous response or static data).')
 
     blocks = tournamentTab.blocks
   } else {
@@ -302,10 +289,7 @@ const fetchTournamentTab = async (subStage: CdlSubStage, tournamentTab: Tourname
   }
 }
 
-const fetchStageTab = async <
-  T extends StageTab | StageSubTab,
-  R extends CdlStage | CdlSubStage,
->(
+const fetchStageTab = async <T extends StageTab | StageSubTab, R extends CdlStage | CdlSubStage>(
   tab: T,
   StageClass: new (data: T) => R,
   responseType: T extends StageTab ? StageResponse : SubStageResponse,
@@ -335,18 +319,13 @@ const fetchStageTab = async <
 
 let playoffs2022SubStage: CdlSubStage = null
 
-const fetchSubStage = async (
-  tab: StageSubTab,
-  stage: CdlStage,
-  season: CdlSeason,
-): Promise<CdlSubStage | null> => {
+const fetchSubStage = async (tab: StageSubTab, stage: CdlStage, season: CdlSeason): Promise<CdlSubStage | null> => {
   const subStage = await fetchStageTab(tab, CdlSubStage, {} as SubStageResponse)
 
   subStage.setRelease(season.release())
 
   const tournamentTabsBlock = subStage.data.blocks.find(
-    (block): block is TournamentTabsBlock =>
-      (block as TournamentTabsBlock).tabs?.ContentTypeUid === 'block_cdl_tabs',
+    (block): block is TournamentTabsBlock => (block as TournamentTabsBlock).tabs?.ContentTypeUid === 'block_cdl_tabs',
   )
 
   if (tournamentTabsBlock) {
@@ -354,9 +333,7 @@ const fetchSubStage = async (
     const filter = whitelist[season.slug()]?.[stage.name()]?.[tab.title]
 
     if (filter && filter !== '*') {
-      tournamentTabs = tournamentTabs.filter((tournamentTab) =>
-        filter.includes(tournamentTab.title),
-      )
+      tournamentTabs = tournamentTabs.filter((tournamentTab) => filter.includes(tournamentTab.title))
     }
 
     console.log(
@@ -368,20 +345,11 @@ const fetchSubStage = async (
     for (const [index, tournamentTab] of tournamentTabs.entries()) {
       console.log('')
 
-      if (
-        isIgnored(
-          season.slug(),
-          stage.name(),
-          subStage.title(),
-          tournamentTab.title,
-        )
-      ) {
+      if (isIgnored(season.slug(), stage.name(), subStage.title(), tournamentTab.title)) {
         continue
       }
 
-      console.log(
-        `Processing tournament tab ${index + 1} of ${tournamentTabs.length}: ${tournamentTab.title}`,
-      )
+      console.log(`Processing tournament tab ${index + 1} of ${tournamentTabs.length}: ${tournamentTab.title}`)
       console.log('----------------------------------')
 
       await fetchTournamentTab(subStage, tournamentTab)
@@ -390,12 +358,8 @@ const fetchSubStage = async (
     console.log('No tournament tabs found on sub stage.')
   }
 
-  const matchCardsBlock = subStage.data.blocks.find(
-    (block): block is CdlMatchCardsBlock =>
-      Object.prototype.hasOwnProperty.call(
-        block as CdlMatchCardsBlock,
-        'cdlMatchCards',
-      ),
+  const matchCardsBlock = subStage.data.blocks.find((block): block is CdlMatchCardsBlock =>
+    Object.prototype.hasOwnProperty.call(block as CdlMatchCardsBlock, 'cdlMatchCards'),
   )
 
   if (matchCardsBlock) {
@@ -419,10 +383,9 @@ const fetchSubStage = async (
 
   saveData[season.slug()].stageTabs[stage.name()].stageSubTabs[subStage.title()] = {
     ...subStage.getData(),
-    blocks: subStage.getData().blocks?.filter(
-      (block): block is CdlWeekHeaderBlock =>
-        Object.hasOwn(block, 'cdlWeekHeader'),
-    ),
+    blocks: subStage
+      .getData()
+      .blocks?.filter((block): block is CdlWeekHeaderBlock => Object.hasOwn(block, 'cdlWeekHeader')),
   }
 
   console.log('')
@@ -430,21 +393,15 @@ const fetchSubStage = async (
 
   subStage.applyBrackets()
 
-  const saveDataSubStage = saveData[season.slug()]
-    .stageTabs[stage.name()]
-    .stageSubTabs[subStage.title()]
+  const saveDataSubStage = saveData[season.slug()].stageTabs[stage.name()].stageSubTabs[subStage.title()]
 
   saveDataSubStage.matches = []
   saveDataSubStage.standardBrackets = []
   saveDataSubStage.groupBrackets = []
 
   subStage.allMatches().forEach((match: CdlMatch) => saveDataSubStage.matches.push(match.getData()))
-  subStage.getStandardBrackets().forEach(
-    (bracket) => saveDataSubStage.standardBrackets.push(bracket.getData())
-  )
-  subStage.getGroupBrackets().forEach(
-    (bracket) => saveDataSubStage.groupBrackets.push(bracket.getData())
-  )
+  subStage.getStandardBrackets().forEach((bracket) => saveDataSubStage.standardBrackets.push(bracket.getData()))
+  subStage.getGroupBrackets().forEach((bracket) => saveDataSubStage.groupBrackets.push(bracket.getData()))
 
   return subStage
 }
@@ -459,21 +416,16 @@ const fetchStage = async (tab: StageTab, season: CdlSeason): Promise<CdlStage> =
   saveData[season.slug()].stageTabs[stage.name()] = { ...stage.getData(), blocks: undefined }
 
   const stageSubTabsBlock = stage.data.blocks.find(
-    (block): block is StageSubTabsBlock =>
-      (block as StageSubTabsBlock).tabs?.ContentTypeUid === 'block_cdl_tabs',
+    (block): block is StageSubTabsBlock => (block as StageSubTabsBlock).tabs?.ContentTypeUid === 'block_cdl_tabs',
   )
   let stageSubTabs = stageSubTabsBlock.tabs.tabs
   const filter = whitelist[season.slug()]?.[tab.title]
 
   if (filter && filter !== '*') {
-    stageSubTabs = stageSubTabs.filter((stageSubTab) =>
-      Object.prototype.hasOwnProperty.call(filter, stageSubTab.title),
-    )
+    stageSubTabs = stageSubTabs.filter((stageSubTab) => Object.prototype.hasOwnProperty.call(filter, stageSubTab.title))
   }
 
-  console.log(
-    `Found ${stageSubTabs.length} sub stages: ${stageSubTabs.map((subTab) => subTab.title).join(', ')}`,
-  )
+  console.log(`Found ${stageSubTabs.length} sub stages: ${stageSubTabs.map((subTab) => subTab.title).join(', ')}`)
 
   for (const [index, stageSubTab] of stageSubTabs.entries()) {
     console.log('')
@@ -482,9 +434,7 @@ const fetchStage = async (tab: StageTab, season: CdlSeason): Promise<CdlStage> =
       continue
     }
 
-    console.log(
-      `Processing sub stage ${index + 1} of ${stageSubTabs.length}: ${stageSubTab.title}.`,
-    )
+    console.log(`Processing sub stage ${index + 1} of ${stageSubTabs.length}: ${stageSubTab.title}.`)
     console.group('------------------------------------')
 
     const subStage = await fetchSubStage(stageSubTab, stage, season)
@@ -532,21 +482,16 @@ const fetchSeason = async (seasonDropdownItem: SeasonDropdownItem): Promise<CdlS
   const season = new CdlSeason(seasonData)
 
   const stageTabsBlock = season.data.blocks.find(
-    (block): block is StageTabsBlock =>
-      (block as StageTabsBlock).tabs?.ContentTypeUid === 'block_cdl_tabs',
+    (block): block is StageTabsBlock => (block as StageTabsBlock).tabs?.ContentTypeUid === 'block_cdl_tabs',
   )
   let stageTabs = stageTabsBlock.tabs.tabs
   const filter = whitelist[season.slug()]
 
   if (filter && filter !== '*') {
-    stageTabs = stageTabs.filter((stageTab) =>
-      Object.prototype.hasOwnProperty.call(filter, stageTab.title),
-    )
+    stageTabs = stageTabs.filter((stageTab) => Object.prototype.hasOwnProperty.call(filter, stageTab.title))
   }
 
-  console.log(
-    `Found ${stageTabs.length} stages: ${stageTabs.map((stageTab) => stageTab.title).join(', ')}`,
-  )
+  console.log(`Found ${stageTabs.length} stages: ${stageTabs.map((stageTab) => stageTab.title).join(', ')}`)
 
   for (const [index, stageTab] of stageTabs.entries()) {
     console.log('')
@@ -555,9 +500,7 @@ const fetchSeason = async (seasonDropdownItem: SeasonDropdownItem): Promise<CdlS
       continue
     }
 
-    console.log(
-      `Processing stage ${index + 1} of ${stageTabs.length}: ${stageTab.title}.`,
-    )
+    console.log(`Processing stage ${index + 1} of ${stageTabs.length}: ${stageTab.title}.`)
     console.group('--------------------------------------')
 
     season.addStage(await fetchStage(stageTab, season))
@@ -575,14 +518,10 @@ export const getSchedule = async (filter: Filter = {}): Promise<CdlSeason[]> => 
   let seasons = await getSeasons()
 
   if (Object.keys(whitelist).length) {
-    seasons = seasons.filter((season) =>
-      Object.prototype.hasOwnProperty.call(whitelist, season.slug),
-    )
+    seasons = seasons.filter((season) => Object.prototype.hasOwnProperty.call(whitelist, season.slug))
   }
 
-  console.log(
-    `Found ${seasons.length} seasons: ${seasons.map((season) => season.slug).join(', ')}.`,
-  )
+  console.log(`Found ${seasons.length} seasons: ${seasons.map((season) => season.slug).join(', ')}.`)
 
   page = await newPage()
   await page.goto(initialUrl)
@@ -597,9 +536,7 @@ export const getSchedule = async (filter: Filter = {}): Promise<CdlSeason[]> => 
     console.log('Hiding score strip to prevent click() conflicts')
 
     await page.waitForSelector('[class^="score-strip-liststyles__Container"]')
-    await page.$eval('[class^="score-strip-liststyles__Container"]', (el) =>
-      el.remove(),
-    )
+    await page.$eval('[class^="score-strip-liststyles__Container"]', (el) => el.remove())
   } catch {
     /**/
   }
@@ -611,9 +548,7 @@ export const getSchedule = async (filter: Filter = {}): Promise<CdlSeason[]> => 
       continue
     }
 
-    console.log(
-      `Processing season ${index + 1} of ${seasons.length}: ${season.slug}.`,
-    )
+    console.log(`Processing season ${index + 1} of ${seasons.length}: ${season.slug}.`)
     console.group('========================================')
 
     schedule.push(await fetchSeason(season))
@@ -660,15 +595,11 @@ export const getScheduleFromSaveData = async (): Promise<CdlSeason[]> => {
         }
 
         if (stageSubTabData.standardBrackets) {
-          stageSubTabData.standardBrackets.forEach(
-            (bracket) => subStage.addBracket(new CdlStandardBracket(bracket)),
-          )
+          stageSubTabData.standardBrackets.forEach((bracket) => subStage.addBracket(new CdlStandardBracket(bracket)))
         }
 
         if (stageSubTabData.groupBrackets) {
-          stageSubTabData.groupBrackets.forEach(
-            (bracket) => subStage.addBracket(new CdlGroupBracket(bracket)),
-          )
+          stageSubTabData.groupBrackets.forEach((bracket) => subStage.addBracket(new CdlGroupBracket(bracket)))
         }
 
         subStage.applyBrackets()
@@ -719,7 +650,12 @@ const printScheduleOverview = (schedule: CdlSeason[]): void => {
         }
 
         if (tournament.groups().length) {
-          console.log(`Groups: ${tournament.groups().map((group) => group.name()).join(', ')}`)
+          console.log(
+            `Groups: ${tournament
+              .groups()
+              .map((group) => group.name())
+              .join(', ')}`,
+          )
         }
       })
 

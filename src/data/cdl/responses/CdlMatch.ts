@@ -5,6 +5,8 @@ import { MappedBracketMatch } from './CdlBracket.js'
 import CdlMatchGame from './CdlMatchGame.js'
 import CdlMatchPlayerOverall from './CdlMatchPlayerOverall.js'
 import CdlMatchPlayerGame from './CdlMatchPlayerGame.js'
+import { MatchFormat, MatchStatus as DbMatchStatus } from '@prisma/client'
+import { IdType } from '../../../lib/prisma/index.js'
 
 export default class CdlMatch extends MatchData {
   protected _date: Date
@@ -20,7 +22,7 @@ export default class CdlMatch extends MatchData {
 
     this._date = new Date(
       // Timestamps can be in either seconds or milliseconds...
-      data.startDate > 1e10 ? date : date * 1000
+      data.startDate > 1e10 ? date : date * 1000,
     )
 
     if (data.homeTeamCard) {
@@ -48,7 +50,7 @@ export default class CdlMatch extends MatchData {
     return this._date
   }
 
-  format(): 'BEST_OF_3' | 'BEST_OF_5' | 'BEST_OF_7' | 'BEST_OF_9' {
+  format(): MatchFormat {
     // No way to determine without the final score so default to BO5.
     if (this.data.match.status !== 'COMPLETED') {
       return 'BEST_OF_5'
@@ -70,15 +72,12 @@ export default class CdlMatch extends MatchData {
     }
   }
 
-  idType(): 'CDL' | 'BP' {
+  idType(): IdType {
     return 'CDL'
   }
 
-  status(): 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' {
-    if (
-      this.data.match.status === 'PRESCHEDULED' ||
-      this.data.match.status === 'PENDING'
-    ) {
+  status(): DbMatchStatus {
+    if (this.data.match.status === 'PRESCHEDULED' || this.data.match.status === 'PENDING') {
       return 'SCHEDULED'
     }
 
@@ -170,23 +169,26 @@ export default class CdlMatch extends MatchData {
       result: {
         homeTeamGamesWon: match.team1Score,
         awayTeamGamesWon: match.team2Score,
-        winnerTeamId: match.status === 'COMPLETED'
-          ? (match.team1Score > match.team2Score ? match.team1.id : match.team2.id)
-          : undefined
+        winnerTeamId:
+          match.status === 'COMPLETED'
+            ? match.team1Score > match.team2Score
+              ? match.team1.id
+              : match.team2.id
+            : undefined,
       },
       homeTeamCard: match.team1?.id
         ? {
-          id: match.team1.id,
-          name: match.team1.name,
-          abbreviation: match.team1.abbreviation,
-        }
+            id: match.team1.id,
+            name: match.team1.name,
+            abbreviation: match.team1.abbreviation,
+          }
         : undefined,
       awayTeamCard: match.team2?.id
         ? {
-          id: match.team2.id,
-          name: match.team2.name,
-          abbreviation: match.team2.abbreviation,
-        }
+            id: match.team2.id,
+            name: match.team2.name,
+            abbreviation: match.team2.abbreviation,
+          }
         : undefined,
       broadcastLinks: [],
     })

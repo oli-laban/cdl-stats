@@ -31,6 +31,8 @@ export default abstract class PlayerResultData {
 
   abstract firstBloods(): number | null
 
+  abstract firstDeaths(): number | null
+
   abstract victimFovKills(): number | null
 
   abstract highestStreak(): number | null
@@ -73,21 +75,17 @@ export default abstract class PlayerResultData {
 
   abstract sndPlanterKills(): number | null
 
+  abstract sndSnipes(): number | null
+
+  abstract snd1v1Wins(): number | null
+
+  abstract snd1v2Wins(): number | null
+
+  abstract snd1v3Wins(): number | null
+
+  abstract snd1v4Wins(): number | null
+
   abstract hpHillTime(): number | null
-
-  abstract hpHill1Time(): number | null
-
-  abstract hpHill2Time(): number | null
-
-  abstract hpHill3Time(): number | null
-
-  abstract hpHill4Time(): number | null
-
-  abstract hpHill5Time(): number | null
-
-  abstract hpHill6Time(): number | null
-
-  abstract hpHill7Time(): number | null
 
   abstract hpContestTime(): number | null
 }

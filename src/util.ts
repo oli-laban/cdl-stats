@@ -4,8 +4,7 @@ import axios from 'axios'
 
 const jsonPath = './json'
 
-export const wait = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms))
+export const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
 
 export const saveDataAsJson = async (filename: string, data: object): Promise<void> => {
   const fullPath = path.join(jsonPath, filename)
@@ -36,9 +35,7 @@ type HtmlResponse = string
 
 export const fetchNextJsonString = async (url: string): Promise<string | null> => {
   const html = await axios.get<HtmlResponse>(url)
-  const match = html.data.match(
-    /<script.*id="__NEXT_DATA__".*?>(.*?)<\/script>/,
-  )
+  const match = html.data.match(/<script.*id="__NEXT_DATA__".*?>(.*?)<\/script>/)
 
   return match?.[1]
 }

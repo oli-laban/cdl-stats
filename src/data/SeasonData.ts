@@ -11,10 +11,6 @@ export default abstract class SeasonData {
     return parseInt(match[0])
   }
 
-  tier(): 'CDL' | 'CHALLENGERS' {
-    return 'CDL'
-  }
-
   release(): string {
     switch (this.year()) {
       case 2021:

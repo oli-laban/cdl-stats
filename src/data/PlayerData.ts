@@ -1,7 +1,9 @@
+import { IdType } from '../lib/prisma/index.js'
+
 export default abstract class PlayerData {
   abstract id(): number | null
 
-  abstract idType(): 'CDL' | 'BP'
+  abstract idType(): IdType
 
   abstract name(): string
 

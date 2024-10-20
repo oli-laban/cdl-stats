@@ -2,9 +2,14 @@ import BracketSlotData from '../../BracketSlotData.js'
 import MatchData from '../../MatchData.js'
 import BpMatch from './BpMatch.js'
 import he from 'he'
+import { BracketSlotType } from '@prisma/client'
 
 export default class BpBracketSlot extends BracketSlotData {
-  constructor(protected _match: BpMatch, protected _round: number, protected _position: number) {
+  constructor(
+    protected _match: BpMatch,
+    protected _round: number,
+    protected _position: number,
+  ) {
     super()
   }
 
@@ -26,8 +31,9 @@ export default class BpBracketSlot extends BracketSlotData {
 
   shortRoundName(): string {
     // Strip "GP X" from group play round names.
-    const roundName = this._match.getData().round.name_short
-      .match(/(?:GP \S+?)?\b(.*)/)[1]
+    const roundName = this._match
+      .getData()
+      .round.name_short.match(/(?:GP \S+?)?\b(.*)/)[1]
       .trim()
 
     if (roundName === 'WQR') {
@@ -41,10 +47,9 @@ export default class BpBracketSlot extends BracketSlotData {
     return roundName
   }
 
-  type(): "UPPER" | "LOWER" {
+  type(): BracketSlotType {
     const round = this.roundName().toLowerCase()
 
     return round.includes('loser') || round.includes('elimination') ? 'LOWER' : 'UPPER'
   }
-
 }

@@ -1,10 +1,5 @@
 import PlayerResultData from '../../PlayerResultData.js'
-import {
-  ControlPlayerStats,
-  GameMode,
-  HpPlayerStats,
-  SndPlayerStats,
-} from '../types.js'
+import { ControlPlayerStats, GameMode, HpPlayerStats, SndPlayerStats } from '../types.js'
 import CdlMatchPlayerGame from './CdlMatchPlayerGame.js'
 import PlayerData from '../../PlayerData.js'
 import CdlPlayer from './CdlPlayer.js'
@@ -14,16 +9,22 @@ type AllModesPlayerStats = HpPlayerStats & SndPlayerStats & ControlPlayerStats
 export default class CdlMatchPlayerOverall extends PlayerResultData {
   protected _player: PlayerData
 
-  constructor(protected games: CdlMatchPlayerGame[], protected _team: number) {
+  constructor(
+    protected games: CdlMatchPlayerGame[],
+    protected _team: number,
+  ) {
     super()
 
-    this._player = new CdlPlayer({
-      id: games[0].player().id(),
-      firstName: games[0].player().firstName(),
-      lastName: games[0].player().lastName(),
-      alias: games[0].player().name(),
-      socialNetworkHandles: [],
-    }, true)
+    this._player = new CdlPlayer(
+      {
+        id: games[0].player().id(),
+        firstName: games[0].player().firstName(),
+        lastName: games[0].player().lastName(),
+        alias: games[0].player().name(),
+        socialNetworkHandles: [],
+      },
+      true,
+    )
   }
 
   private sum(property: keyof AllModesPlayerStats, mode?: GameMode | GameMode[]): number | null {
@@ -32,7 +33,7 @@ export default class CdlMatchPlayerOverall extends PlayerResultData {
     }
 
     return this.games
-      .filter((game) => mode ? mode.includes(game.data.gameMode) : true)
+      .filter((game) => (mode ? mode.includes(game.data.gameMode) : true))
       .reduce((accumulator: number, current) => {
         const value = current.data.stats?.[property]
 
@@ -129,39 +130,6 @@ export default class CdlMatchPlayerOverall extends PlayerResultData {
 
   highestStreak(): number | null {
     return this.max('highestStreak')
-  }
-
-  hpHill1Time(): number | null {
-    // Stat exists in data as time string but is always "00:00".
-    return null
-  }
-
-  hpHill2Time(): number | null {
-    // Stat exists in data as time string but is always "00:00".
-    return null
-  }
-
-  hpHill3Time(): number | null {
-    // Stat exists in data as time string but is always "00:00".
-    return null
-  }
-
-  hpHill4Time(): number | null {
-    // Stat exists in data as time string but is always "00:00".
-    return null
-  }
-
-  hpHill5Time(): number | null {
-    // Stat exists in data as time string but is always "00:00".
-    return null
-  }
-
-  hpHill6Time(): number | null {
-    return null
-  }
-
-  hpHill7Time(): number | null {
-    return null
   }
 
   hpHillTime(): number | null {
@@ -262,5 +230,29 @@ export default class CdlMatchPlayerOverall extends PlayerResultData {
 
   sndPlants(): number | null {
     return this.sum('bombsPlanted', ['CDL SnD', 'CDL Search & Destroy'])
+  }
+
+  firstDeaths(): number | null {
+    return null
+  }
+
+  snd1v1Wins(): number | null {
+    return null
+  }
+
+  snd1v2Wins(): number | null {
+    return null
+  }
+
+  snd1v3Wins(): number | null {
+    return null
+  }
+
+  snd1v4Wins(): number | null {
+    return null
+  }
+
+  sndSnipes(): number | null {
+    return null
   }
 }

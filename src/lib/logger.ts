@@ -12,15 +12,17 @@ export const isVerbose = (): boolean => verbose
 
 export const log = (...data: any[]): void => console.log(...data)
 
-export const logError = (message: string, verboseOnly: boolean = false): void => (
+export const logError = (message: string, verboseOnly: boolean = false): void =>
   (!verboseOnly || verbose) && log(chalk.red.bold(message))
-)
 
-export const logInfo = (message: string, verboseOnly: boolean = false): void => (
+export const logInfo = (message: string, verboseOnly: boolean = false): void =>
   (!verboseOnly || verbose) && log(chalk.green.bold(message))
-)
 
 export const logNewline = (verboseOnly: boolean = false): void => (!verboseOnly || verbose) && log('')
+
+export const logWithoutNewline = (message: string, verboseOnly: boolean = false): void => {
+  ;(!verboseOnly || verbose) && process.stdout.write(message)
+}
 
 export const logVerbose = (...data: any[]): void => {
   if (!verbose) {

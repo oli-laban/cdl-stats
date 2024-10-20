@@ -1,10 +1,10 @@
 import BracketSlotData from '../../BracketSlotData.js'
 import MatchData from '../../MatchData.js'
 import CdlMatch from './CdlMatch.js'
+import { BracketSlotType } from '@prisma/client'
 
 interface Data {
   match: CdlMatch
-  roundName: string
   position: string
   group?: string
   roundNumber: number
@@ -29,7 +29,27 @@ export default class CdlBracketSlot extends BracketSlotData {
   }
 
   roundName(): string {
-    return this.data.roundName
+    if (this.shortRoundName().startsWith('WR')) {
+      return `Winners Round ${this.round()}`
+    }
+
+    if (this.shortRoundName().startsWith('LR')) {
+      return `Elimination Round ${this.round()}`
+    }
+
+    if (this.shortRoundName() === 'WF') {
+      return 'Winners Finals'
+    }
+
+    if (this.shortRoundName() === 'LF') {
+      return 'Elimination Finals'
+    }
+
+    if (this.shortRoundName() === 'GF') {
+      return 'Grand Finals'
+    }
+
+    return ''
   }
 
   shortRoundName(): string {
@@ -40,7 +60,7 @@ export default class CdlBracketSlot extends BracketSlotData {
     return this.data.group
   }
 
-  type(): 'UPPER' | 'LOWER' {
+  type(): BracketSlotType {
     return this.data.position.startsWith('W') || this.data.position.startsWith('GF') ? 'UPPER' : 'LOWER'
   }
 }

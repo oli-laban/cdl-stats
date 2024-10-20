@@ -6,16 +6,22 @@ import CdlPlayer from './CdlPlayer.js'
 export default class CdlMatchPlayerGame extends PlayerResultData {
   protected _player: PlayerData
 
-  constructor(public data: MatchPlayerGame, protected _team: number) {
+  constructor(
+    public data: MatchPlayerGame,
+    protected _team: number,
+  ) {
     super()
 
-    this._player = new CdlPlayer({
-      id: data.id,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      alias: data.alias,
-      socialNetworkHandles: [],
-    }, true)
+    this._player = new CdlPlayer(
+      {
+        id: data.id,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        alias: data.alias,
+        socialNetworkHandles: [],
+      },
+      true,
+    )
   }
 
   player(): PlayerData {
@@ -35,11 +41,11 @@ export default class CdlMatchPlayerGame extends PlayerResultData {
   }
 
   ctrlCaptures(): number | null {
-    return this.data.gameMode === 'CDL Control' ? (this.data.stats?.totalObjectivesCaptured ?? null) : null
+    return this.data.gameMode === 'CDL Control' ? this.data.stats?.totalObjectivesCaptured ?? null : null
   }
 
   ctrlTicks(): number | null {
-    return this.data.gameMode === 'CDL Control' ? (this.data.stats?.objectiveTiersContributed ?? null) : null
+    return this.data.gameMode === 'CDL Control' ? this.data.stats?.objectiveTiersContributed ?? null : null
   }
 
   damage(): number | null {
@@ -75,41 +81,8 @@ export default class CdlMatchPlayerGame extends PlayerResultData {
     return this.data.stats?.highestStreak ?? null
   }
 
-  hpHill1Time(): number | null {
-    // Stat exists in data as time string but is always "00:00".
-    return null
-  }
-
-  hpHill2Time(): number | null {
-    // Stat exists in data as time string but is always "00:00".
-    return null
-  }
-
-  hpHill3Time(): number | null {
-    // Stat exists in data as time string but is always "00:00".
-    return null
-  }
-
-  hpHill4Time(): number | null {
-    // Stat exists in data as time string but is always "00:00".
-    return null
-  }
-
-  hpHill5Time(): number | null {
-    // Stat exists in data as time string but is always "00:00".
-    return null
-  }
-
-  hpHill6Time(): number | null {
-    return null
-  }
-
-  hpHill7Time(): number | null {
-    return null
-  }
-
   hpHillTime(): number | null {
-    return this.data.gameMode === 'CDL Hardpoint' ? (this.data.stats?.hillTime ?? null) : null
+    return this.data.gameMode === 'CDL Hardpoint' ? this.data.stats?.hillTime ?? null : null
   }
 
   killDeathRatio(): string | null {
@@ -150,19 +123,19 @@ export default class CdlMatchPlayerGame extends PlayerResultData {
 
   sndAces(): number | null {
     return this.data.gameMode === 'CDL SnD' || this.data.gameMode === 'CDL Search & Destroy'
-      ? (this.data.stats?.totalAces ?? null)
+      ? this.data.stats?.totalAces ?? null
       : null
   }
 
   sndDefuserKills(): number | null {
     return this.data.gameMode === 'CDL SnD' || this.data.gameMode === 'CDL Search & Destroy'
-      ? (this.data.stats?.totalDefuserKills ?? null)
+      ? this.data.stats?.totalDefuserKills ?? null
       : null
   }
 
   sndPlanterKills(): number | null {
     return this.data.gameMode === 'CDL SnD' || this.data.gameMode === 'CDL Search & Destroy'
-      ? (this.data.stats?.totalPlanterKills ?? null)
+      ? this.data.stats?.totalPlanterKills ?? null
       : null
   }
 
@@ -199,24 +172,48 @@ export default class CdlMatchPlayerGame extends PlayerResultData {
   }
 
   hpContestTime(): number | null {
-    return this.data.gameMode === 'CDL Hardpoint' ? (this.data.stats?.contestedHillTime ?? null) : null
+    return this.data.gameMode === 'CDL Hardpoint' ? this.data.stats?.contestedHillTime ?? null : null
   }
 
   sndDefuses(): number | null {
     return this.data.gameMode === 'CDL SnD' || this.data.gameMode === 'CDL Search & Destroy'
-      ? (this.data.stats?.bombsDefused ?? null)
+      ? this.data.stats?.bombsDefused ?? null
       : null
   }
 
   sndNinjaDefuses(): number | null {
     return this.data.gameMode === 'CDL SnD' || this.data.gameMode === 'CDL Search & Destroy'
-      ? (this.data.stats?.sneakDefuses ?? null)
+      ? this.data.stats?.sneakDefuses ?? null
       : null
   }
 
   sndPlants(): number | null {
     return this.data.gameMode === 'CDL SnD' || this.data.gameMode === 'CDL Search & Destroy'
-      ? (this.data.stats?.bombsPlanted ?? null)
+      ? this.data.stats?.bombsPlanted ?? null
       : null
+  }
+
+  firstDeaths(): number | null {
+    return null
+  }
+
+  snd1v1Wins(): number | null {
+    return null
+  }
+
+  snd1v2Wins(): number | null {
+    return null
+  }
+
+  snd1v3Wins(): number | null {
+    return null
+  }
+
+  snd1v4Wins(): number | null {
+    return null
+  }
+
+  sndSnipes(): number | null {
+    return null
   }
 }

@@ -22,7 +22,7 @@ export default class CdlGroupBracket extends CdlBracket<CdlDynamicGroupBracket> 
   }
 
   getMappedMatches(): MappedBracketMatch[] {
-    const matches = this.data.shapedMatches.flatMap((group) =>
+    return this.data.shapedMatches.flatMap((group) =>
       this.determineRoundAndPositionNumbersFromString(
         group.matches.map((match) => {
           let status: MatchStatus = MatchStatus.Completed
@@ -41,18 +41,20 @@ export default class CdlGroupBracket extends CdlBracket<CdlDynamicGroupBracket> 
             group: group.groupLabel,
             team1Score: match.teams?.[0]?.score || 0,
             team2Score: match.teams?.[1]?.score || 0,
-            team1: match.teams[0] && 'id' in match.teams[0]
-              ? {
-                id: match.teams[0].id,
-                name: this.teamNameForMappedMatch(match.teams[0]),
-              }
-              : null,
-            team2: match.teams[1] && 'id' in match.teams[1]
-              ? {
-                id: match.teams[1].id,
-                name: this.teamNameForMappedMatch(match.teams[1]),
-              }
-              : null,
+            team1:
+              match.teams[0] && 'id' in match.teams[0]
+                ? {
+                    id: match.teams[0].id,
+                    name: this.teamNameForMappedMatch(match.teams[0]),
+                  }
+                : null,
+            team2:
+              match.teams[1] && 'id' in match.teams[1]
+                ? {
+                    id: match.teams[1].id,
+                    name: this.teamNameForMappedMatch(match.teams[1]),
+                  }
+                : null,
             link: match.href,
             startDate: match.startDate,
             status,
@@ -60,15 +62,12 @@ export default class CdlGroupBracket extends CdlBracket<CdlDynamicGroupBracket> 
         }),
       ),
     )
-
-    return this.addRoundNamesToMatches(matches)
   }
 
   private getMatchPosition(match: GroupBracketMatch): string {
     return this.data.groups
       .flatMap((group) => group.matches)
-      .find((groupMatch) => groupMatch.matchId === parseInt(match.matchId))
-      ?.bracketPosition
+      .find((groupMatch) => groupMatch.matchId === parseInt(match.matchId))?.bracketPosition
   }
 
   getData(): CdlDynamicGroupBracket {

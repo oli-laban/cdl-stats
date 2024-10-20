@@ -8,6 +8,8 @@ import CdlBracketSlot from './CdlBracketSlot.js'
 import CdlGroupBracket from './CdlGroupBracket.js'
 import CdlGroupBracketGroup from './CdlGroupBracketGroup.js'
 import CdlStandardBracket from './CdlStandardBracket.js'
+import { BracketType, SplitType, TournamentFormat } from '@prisma/client'
+import { IdType } from '../../../lib/prisma/index.js'
 
 export default class CdlSubStage extends TournamentData {
   public tournamentTitle: string
@@ -25,9 +27,8 @@ export default class CdlSubStage extends TournamentData {
   }
 
   protected getTournamentTitle(): string {
-    const headerBlock = this.data.blocks.find(
-      (block): block is CdlWeekHeaderBlock =>
-        Object.hasOwn(block, 'cdlWeekHeader'),
+    const headerBlock = this.data.blocks.find((block): block is CdlWeekHeaderBlock =>
+      Object.hasOwn(block, 'cdlWeekHeader'),
     )
 
     return headerBlock?.cdlWeekHeader.primaryTitle || this.data.title
@@ -37,7 +38,7 @@ export default class CdlSubStage extends TournamentData {
     return null
   }
 
-  idType(): 'CDL' | 'BP' {
+  idType(): IdType {
     return 'CDL'
   }
 
@@ -65,7 +66,7 @@ export default class CdlSubStage extends TournamentData {
     return this.sortedMatches()[this._allMatches.length - 1].date()
   }
 
-  format(): 'BRACKET' | 'ROUND' {
+  format(): TournamentFormat {
     return this.brackets.length ? 'BRACKET' : 'ROUND'
   }
 
@@ -77,14 +78,12 @@ export default class CdlSubStage extends TournamentData {
     return this._allMatches
   }
 
-  bracketType(): 'SINGLE_ELIMINATION' | 'DOUBLE_ELIMINATION' | null {
+  bracketType(): BracketType | null {
     if (this.format() === 'ROUND') {
       return null
     }
 
-    return this.bracketSlots().find((slot) => slot.type() === 'LOWER')
-      ? 'DOUBLE_ELIMINATION'
-      : 'SINGLE_ELIMINATION'
+    return this.bracketSlots().find((slot) => slot.type() === 'LOWER') ? 'DOUBLE_ELIMINATION' : 'SINGLE_ELIMINATION'
   }
 
   bracketSlots(): BracketSlotData[] {
@@ -113,7 +112,7 @@ export default class CdlSubStage extends TournamentData {
     return false
   }
 
-  splitType(): 'QUALIFIERS' | 'FINAL' | null {
+  splitType(): SplitType | null {
     return this.brackets.length ? 'FINAL' : 'QUALIFIERS'
   }
 
@@ -138,16 +137,14 @@ export default class CdlSubStage extends TournamentData {
   }
 
   applyBrackets(): void {
-    const matches = [ ...this._allMatches ]
+    const matches = [...this._allMatches]
 
     this.brackets.forEach((bracket) => {
       const slots = bracket
         .getMappedMatches()
         .map((bracketMatch) => {
-          const index = matches.findIndex(
-            (match) => match.id() === bracketMatch.id,
-          )
-          let match: CdlMatch;
+          const index = matches.findIndex((match) => match.id() === bracketMatch.id)
+          let match: CdlMatch
 
           if (index !== -1) {
             match = matches.splice(index, 1)[0]
@@ -159,7 +156,6 @@ export default class CdlSubStage extends TournamentData {
 
           return new CdlBracketSlot({
             match,
-            roundName: bracketMatch.round,
             position: bracketMatch.position,
             group: bracketMatch.group,
             roundNumber: bracketMatch.roundNumber,
@@ -188,14 +184,10 @@ export default class CdlSubStage extends TournamentData {
   }
 
   protected sortedMatches(): CdlMatch[] {
-    return this._allMatches.sort(
-      (a, b) => a.date().getTime() - b.date().getTime(),
-    )
+    return this._allMatches.sort((a, b) => a.date().getTime() - b.date().getTime())
   }
 
-  protected splitBracketSlotsIntoGroups(
-    slots: CdlBracketSlot[],
-  ): Record<string, CdlBracketSlot[]> {
+  protected splitBracketSlotsIntoGroups(slots: CdlBracketSlot[]): Record<string, CdlBracketSlot[]> {
     return slots.reduce((accumulator, slot) => {
       const group = slot.groupName()
 

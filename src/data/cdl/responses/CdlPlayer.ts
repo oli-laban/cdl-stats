@@ -1,8 +1,12 @@
 import PlayerData from '../../PlayerData.js'
 import { Player } from '../types.js'
+import { IdType } from '../../../lib/prisma/index.js'
 
 export default class CdlPlayer extends PlayerData {
-  constructor(protected data: Player, protected _syncUsingName: boolean = false) {
+  constructor(
+    protected data: Player,
+    protected _syncUsingName: boolean = false,
+  ) {
     super()
   }
 
@@ -14,7 +18,7 @@ export default class CdlPlayer extends PlayerData {
     return this.data.id
   }
 
-  idType(): 'CDL' | 'BP' {
+  idType(): IdType {
     return 'CDL'
   }
 
@@ -35,9 +39,7 @@ export default class CdlPlayer extends PlayerData {
   }
 
   twitchUrl(): string | null {
-    return this.data.socialNetworkHandles
-      .find((handle) => handle.socialNetworkType === 'TWITTER')
-      ?.handle
+    return this.data.socialNetworkHandles.find((handle) => handle.socialNetworkType === 'TWITTER')?.handle
   }
 
   twitterUrl(): string | null {

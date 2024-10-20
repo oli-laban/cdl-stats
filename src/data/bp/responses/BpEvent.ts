@@ -6,6 +6,8 @@ import MatchData from '../../MatchData.js'
 import BpMatch from './BpMatch.js'
 import BpGroup from './BpGroup.js'
 import BpBracketSlot from './BpBracketSlot.js'
+import { BracketType, SplitType, TournamentFormat } from '@prisma/client'
+import { IdType } from '../../../lib/prisma/index.js'
 
 interface BracketRounds {
   [roundName: string]: Match[]
@@ -17,7 +19,10 @@ export default class BpEvent extends TournamentData {
   private _bracketSlots: BpBracketSlot[] = []
   private _groups: BpGroup[] = []
 
-  constructor(private data: Omit<EventT, 'teams'>, private matchesData: Match[]) {
+  constructor(
+    private data: Omit<EventT, 'teams'>,
+    private matchesData: Match[],
+  ) {
     super()
 
     // The next winner match ids are (currently) scuffed on the ewc 2024 bracket so they need
@@ -33,7 +38,7 @@ export default class BpEvent extends TournamentData {
     return this.data.id
   }
 
-  idType(): 'CDL' | 'BP' {
+  idType(): IdType {
     return 'BP'
   }
 
@@ -45,9 +50,9 @@ export default class BpEvent extends TournamentData {
     return this._bracketSlots
   }
 
-  bracketType(): "SINGLE_ELIMINATION" | "DOUBLE_ELIMINATION" | null {
+  bracketType(): BracketType | null {
     return this.format() === 'BRACKET'
-      ? this.data.tournament_elimination_type.toUpperCase() as Uppercase<EventT['tournament_elimination_type']>
+      ? (this.data.tournament_elimination_type.toUpperCase() as Uppercase<EventT['tournament_elimination_type']>)
       : null
   }
 
@@ -55,7 +60,7 @@ export default class BpEvent extends TournamentData {
     return this.matchesData.length ? new Date(this.matchesData[this.matchesData.length - 1].datetime) : null
   }
 
-  format(): 'BRACKET' | 'ROUND' {
+  format(): TournamentFormat {
     return this.data.number_of_tournament_bracket_teams === null ? 'ROUND' : 'BRACKET'
   }
 
@@ -91,7 +96,7 @@ export default class BpEvent extends TournamentData {
     return releaseMap[this.data.season_id] || null
   }
 
-  splitType(): "QUALIFIERS" | "FINAL" | null {
+  splitType(): SplitType | null {
     return this.data.tier === 'Qualifier' ? 'QUALIFIERS' : 'FINAL'
   }
 
@@ -165,39 +170,37 @@ export default class BpEvent extends TournamentData {
     }
 
     // Sort the rounds in reverse for now as we need to loop through them backwards in order to sort the matches.
-    const reverseSortedRounds = Object.entries(bracket).sort(
-      ([aName], [bName]) => {
-        const getRoundOrder = (roundName: string): [number, number] => {
-          for (const [pattern, value] of Object.entries(roundOrder)) {
-            if (new RegExp(pattern).test(roundName)) {
-              const match = roundName.match(/\d+/)
-              const roundNameNumber = match ? parseInt(match[0]) : 0
+    const reverseSortedRounds = Object.entries(bracket).sort(([aName], [bName]) => {
+      const getRoundOrder = (roundName: string): [number, number] => {
+        for (const [pattern, value] of Object.entries(roundOrder)) {
+          if (new RegExp(pattern).test(roundName)) {
+            const match = roundName.match(/\d+/)
+            const roundNameNumber = match ? parseInt(match[0]) : 0
 
-              return [value, roundNameNumber]
-            }
+            return [value, roundNameNumber]
           }
-
-          throw new Error(`Unrecognized round name "${roundName}".`)
         }
 
-        const [orderA, nameNumberA] = getRoundOrder(aName)
-        const [orderB, nameNumberB] = getRoundOrder(bName)
+        throw new Error(`Unrecognized round name "${roundName}".`)
+      }
 
-        if (orderA !== orderB) {
-          return orderB - orderA
-        }
+      const [orderA, nameNumberA] = getRoundOrder(aName)
+      const [orderB, nameNumberB] = getRoundOrder(bName)
 
-        // If the rounds matched the same name (e.g. 'Winners Round') sort based on the extracted round number
-        // (e.g. 1 in 'Winners Round 1')
-        if (nameNumberA !== nameNumberB) {
-          return nameNumberB - nameNumberA
-        }
+      if (orderA !== orderB) {
+        return orderB - orderA
+      }
 
-        // If it still didn't match and getRoundOrder() didn't throw an error, who knows? Maybe they've used
-        // A, B, C instead of numbers in the round name. Just sort alphabetically.
-        return bName.localeCompare(aName)
-      },
-    )
+      // If the rounds matched the same name (e.g. 'Winners Round') sort based on the extracted round number
+      // (e.g. 1 in 'Winners Round 1')
+      if (nameNumberA !== nameNumberB) {
+        return nameNumberB - nameNumberA
+      }
+
+      // If it still didn't match and getRoundOrder() didn't throw an error, who knows? Maybe they've used
+      // A, B, C instead of numbers in the round name. Just sort alphabetically.
+      return bName.localeCompare(aName)
+    })
 
     const reverseSortedWinnersRounds: [string, Match[]][] = []
     const reverseSortedLosersRounds: [string, Match[]][] = []
@@ -244,25 +247,19 @@ export default class BpEvent extends TournamentData {
       }
 
       if (a.winner_next_match_id === b.winner_next_match_id) {
-        return a.winner_next_match_team_position === 'team1'
-          || a.winner_next_match_team_position === 'team 1'
-            ? -1
-            : 1
+        return a.winner_next_match_team_position === 'team1' || a.winner_next_match_team_position === 'team 1' ? -1 : 1
       }
 
-      let aWinnerNextMatchIndex = succeedingRoundMatchOrder.findIndex(
-        (match) => match.id === a.winner_next_match_id,
-      )
-      let bWinnerNextMatchIndex = succeedingRoundMatchOrder.findIndex(
-        (match) => match.id === b.winner_next_match_id,
-      )
+      let aWinnerNextMatchIndex = succeedingRoundMatchOrder.findIndex((match) => match.id === a.winner_next_match_id)
+      let bWinnerNextMatchIndex = succeedingRoundMatchOrder.findIndex((match) => match.id === b.winner_next_match_id)
 
       if (aWinnerNextMatchIndex === -1 || bWinnerNextMatchIndex === -1) {
         // The next winner match ids don't line up with the next round's match ids. If it's a completed bracket,
         // it should be possible to find the next match using the teams instead.
-        const findNextMatchIndexFromTeams = (match: Match): number => succeedingRoundMatchOrder.findIndex(
-          (nextMatch) => nextMatch.team_1_id === match.winner_id || nextMatch.team_2_id === match.winner_id,
-        )
+        const findNextMatchIndexFromTeams = (match: Match): number =>
+          succeedingRoundMatchOrder.findIndex(
+            (nextMatch) => nextMatch.team_1_id === match.winner_id || nextMatch.team_2_id === match.winner_id,
+          )
 
         if (a.winner_id && b.winner_id) {
           aWinnerNextMatchIndex = findNextMatchIndexFromTeams(a)
@@ -272,8 +269,8 @@ export default class BpEvent extends TournamentData {
         if (aWinnerNextMatchIndex === -1 || bWinnerNextMatchIndex === -1) {
           // Now it's a lost cause. The bracket may need to be manually fixed a la EWC 2024.
           throw new Error(
-            `winner_next_match_ids "${a.winner_next_match_id}", "${b.winner_next_match_id}" `
-            + `not found in succeeding round's matches (${succeedingRoundMatchOrder.join(', ')})`
+            `winner_next_match_ids "${a.winner_next_match_id}", "${b.winner_next_match_id}" ` +
+              `not found in succeeding round's matches (${succeedingRoundMatchOrder.join(', ')})`,
           )
         }
       }
